@@ -21,6 +21,7 @@ async function run(){
         await client.connect();
         const toolsCollection = client.db('Gear_store').collection('tools');
         const orderCollection = client.db('Gear_store').collection('orders');
+        const reviewCollection = client.db('Gear_store').collection('reviews');
 
         //getting every collection for tools and home tools
         app.get('/tools', async (req, res) => {
@@ -40,11 +41,17 @@ async function run(){
             res.send(tool);
           });
 
-          //adding order
-
+          //adding order api
           app.post('/order',async(req,res)=>{
             const order = req.body;
             const result = await orderCollection.insertOne(order);
+            res.send(result);
+          });
+
+          //getting reviews from database
+          app.get('/reviews',async(req,res)=>{
+            const query = {};
+            const result = await reviewCollection.find(query).toArray();
             res.send(result);
           })
 
