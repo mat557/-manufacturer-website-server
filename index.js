@@ -22,6 +22,7 @@ async function run(){
         const toolsCollection = client.db('Gear_store').collection('tools');
         const orderCollection = client.db('Gear_store').collection('orders');
         const reviewCollection = client.db('Gear_store').collection('reviews');
+        const userCollection = client.db('Gear_store').collection('users');
 
         //getting every collection for tools and home tools
         app.get('/tools', async (req, res) => {
@@ -48,7 +49,7 @@ async function run(){
             res.send(result);
           });
 
-          //getting reviews from database
+          //getting reviews from database not used yet
           app.get('/reviews',async(req,res)=>{
             const query = {};
             const result = await reviewCollection.find(query).toArray();
@@ -71,6 +72,21 @@ async function run(){
             const result = await orderCollection.deleteOne(query);
             res.send(result);
           });
+
+
+          //adding user api 
+          app.put('/user/:email',async(req,res)=>{
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+              $set: user,
+            };
+            const result = await userCollection.updateOne(filter,updateDoc, options);
+
+            res.send(result);
+          })
 
     }
     finally{}
