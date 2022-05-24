@@ -53,16 +53,30 @@ async function run(){
             const query = {};
             const result = await reviewCollection.find(query).toArray();
             res.send(result);
-          })
+          });
+
+
+          //get all order for perticular customer
+          app.get('/customOrder',async(req,res)=>{
+            const email = req.query.email;
+            const query = {email : email};
+            const result = await orderCollection.find(query).toArray();
+            res.send(result);
+          });
+
+          //deleting the random order
+          app.delete('/order/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id : ObjectId(id)}
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+          });
 
     }
     finally{}
 }
 
 run().catch(console.dir);
-
-
-
 
 
 
