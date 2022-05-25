@@ -127,7 +127,33 @@ async function run(){
             const result = await allUserCollection.updateOne(filter,updateDoc,options);
             const token = jwt.sign({ email : email }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
             res.send({result,token});
-          })
+          });
+
+
+          // this api is for loading all user for dashboar all user comp...
+          app.get('/alluser',verifyJwt,async(req,res)=>{
+            const query = {};
+            const result = await allUserCollection.find(query).toArray();
+            res.send(result)
+          });
+
+          //this api is to set admin role in db ,used  in dashboard all user
+          app.put('/newuser/admin/:email',verifyJwt,async(req,res)=>{
+            const email = req.params.email;
+            const filter = {email : email}
+            const adminEmail = req.decoded.email;
+            const userWithAdmin = await allUserCollection.findOne({email :adminEmail});
+            if(userWithAdmin.role === 'Admin'){
+                const updateDoc = {
+                  $set: {role :'Admin'},
+                }
+                const result = await allUserCollection.updateOne(filter,updateDoc);
+                res.send(result);
+            }
+            else{
+              res.status(403).send({message : 'forbidden access'})
+            }
+          });
 
     }
     finally{}
