@@ -17,6 +17,24 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+function verifyJwt(req,res,next){
+  const authHeader = req.headers.authorization;
+  if(!authHeader){
+    return res.stuts(401).send({message : 'unauthorized access'});
+  }
+  const token = authHeader.split(' ')[1];
+  jwt.verify(token, process.env.TOKEN_SECRET, function(err, decoded) {
+    if(err){
+      return res.status(403).send({message:"forbidden access"})
+    }
+    // console.log(decoded)
+    req.decoded = decoded;
+    next();
+  });
+}
+
+
+
 async function run(){
     try{
         await client.connect();
@@ -53,12 +71,17 @@ async function run(){
 
 
           //get all order for perticular customer
-          app.get('/customOrder',async(req,res)=>{
-            const email = req.query.email;
-            const authorization = req.headers.authorization;//this line is marked
-            const query = {email : email};
-            const result = await orderCollection.find(query).toArray();
-            res.send(result);
+          app.get('/customOrder',verifyJwt,async(req,res)=>{
+            const email = req.query.email;//this line is marked
+            const decodedEmail = req.decoded.email;
+            if(decodedEmail){
+              const query = {email : email};
+              const result = await orderCollection.find(query).toArray();
+              return res.send(result);
+            }
+            else{
+              return res.status(403).send({message:'forbidden access'})
+            }
           });
 
           //deleting the random order
