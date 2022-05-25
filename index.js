@@ -155,6 +155,15 @@ async function run(){
             }
           });
 
+          //this api is for to check admin
+          app.get('/admin/:email',async(req,res)=>{
+            const email = req.params.email;
+            const user = await allUserCollection.findOne({email : email})
+            const isAdmin =  user.role === 'Admin';
+            console.log(isAdmin)
+            res.send({admin : isAdmin})
+          })
+
     }
     finally{}
 }
