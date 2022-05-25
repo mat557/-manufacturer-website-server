@@ -21,8 +21,9 @@ async function run(){
         await client.connect();
         const toolsCollection = client.db('Gear_store').collection('tools');
         const orderCollection = client.db('Gear_store').collection('orders');
-        const reviewCollection = client.db('Gear_store').collection('reviews');
+        // const reviewCollection = client.db('Gear_store').collection('reviews');
         const userCollection = client.db('Gear_store').collection('users');
+        const allUserCollection = client.db('Gear_store').collection('usersForAdmin');
 
         //getting every collection for tools and home tools
         app.get('/tools', async (req, res) => {
@@ -46,13 +47,6 @@ async function run(){
           app.post('/order',async(req,res)=>{
             const order = req.body;
             const result = await orderCollection.insertOne(order);
-            res.send(result);
-          });
-
-          //getting reviews from database not used yet
-          app.get('/reviews',async(req,res)=>{
-            const query = {};
-            const result = await reviewCollection.find(query).toArray();
             res.send(result);
           });
 
@@ -84,7 +78,28 @@ async function run(){
               $set: user,
             };
             const result = await userCollection.updateOne(filter,updateDoc, options);
+            res.send(result);
+          });
 
+          //user get api for profile
+          app.get('/userByEmail',async(req,res)=>{
+            const email = req.query.email;
+            const query = {email : email};
+            const result = await userCollection.findOne(query);
+            res.send(result);
+          });
+
+          
+          //creating put method for new user to store user info who loged in used in useGettoken
+          app.put('/newuser/:email',async(req,res)=>{
+            const email = req.params.email;
+            const user = req.body;
+            const filter = {email : email}
+            const options = {upsert:true}
+            const updateDoc = {
+              $set: user,
+            }
+            const result = await allUserCollection.updateOne(filter,updateDoc,options)
             res.send(result);
           })
 
