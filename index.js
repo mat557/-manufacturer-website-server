@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 const app = express();
@@ -54,6 +55,7 @@ async function run(){
           //get all order for perticular customer
           app.get('/customOrder',async(req,res)=>{
             const email = req.query.email;
+            const authorization = req.headers.authorization;//this line is marked
             const query = {email : email};
             const result = await orderCollection.find(query).toArray();
             res.send(result);
@@ -99,8 +101,9 @@ async function run(){
             const updateDoc = {
               $set: user,
             }
-            const result = await allUserCollection.updateOne(filter,updateDoc,options)
-            res.send(result);
+            const result = await allUserCollection.updateOne(filter,updateDoc,options);
+            const token = jwt.sign({ email : email }, process.env.TOKEN_SECRET, { expiresIn: '1h' });
+            res.send({result,token});
           })
 
     }
