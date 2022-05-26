@@ -171,10 +171,20 @@ async function run(){
             res.send(result);
           });
 
+          //get all the review from db
           app.get('/getreview',async(req,res)=>{
             const reviews = await reviewCollection.find().toArray();
             res.send(reviews);
+          });
+
+          app.get('/singlereview/:email',async(req,res)=>{
+            const email = req.params.email;
+            const query = {email : email};
+            const result = await reviewCollection.findOne(query);
+            res.send(result);
           })
+
+
 
     }
     finally{}
