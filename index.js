@@ -40,7 +40,7 @@ async function run(){
         await client.connect();
         const toolsCollection = client.db('Gear_store').collection('tools');
         const orderCollection = client.db('Gear_store').collection('orders');
-        // const reviewCollection = client.db('Gear_store').collection('reviews');
+        const reviewCollection = client.db('Gear_store').collection('reviews');
         const userCollection = client.db('Gear_store').collection('users');
         const allUserCollection = client.db('Gear_store').collection('usersForAdmin');
 
@@ -160,8 +160,20 @@ async function run(){
             const email = req.params.email;
             const user = await allUserCollection.findOne({email : email})
             const isAdmin =  user.role === 'Admin';
-            console.log(isAdmin)
             res.send({admin : isAdmin})
+          });
+
+
+          //for review will be use in dashboard review
+          app.post('/addreview',async(req,res)=>{
+            const review = req.body;
+            const result = await reviewCollection.insertOne(review);
+            res.send(result);
+          });
+
+          app.get('/getreview',async(req,res)=>{
+            const reviews = await reviewCollection.find().toArray();
+            res.send(reviews);
           })
 
     }
