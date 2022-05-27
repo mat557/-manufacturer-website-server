@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const stripe = require("stripe")(process.env.STRIPE_KEY);
 const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
@@ -171,7 +172,7 @@ async function run(){
             res.send(result);
           });
 
-          //get all the review from db
+          //get all the review from  db
           app.get('/getreview',async(req,res)=>{
             const reviews = await reviewCollection.find().toArray();
             res.send(reviews);
@@ -182,8 +183,56 @@ async function run(){
             const query = {email : email};
             const result = await reviewCollection.findOne(query);
             res.send(result);
-          })
+          });
 
+
+          //for payment route
+
+          app.get('/payment/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id : ObjectId(id)};
+            const result = await orderCollection.findOne(query);
+            res.send(result);
+          });
+
+
+
+          // app.post('/create-payment-intent', async (req, res) => {
+
+          //   const service = req.body;
+          //   const price = service.price;
+          //   const amount = price*100;
+          //   const paymentIntent = await stripe.paymentIntents.create({
+          //     amount : amount,
+          //     currency: 'usd',
+          //     payment_methods_types:['card'],
+          //   })
+
+          //   res.send({
+          //     clientSecret: paymentIntent.client_secret,
+          //   });
+          // })
+
+
+          app.post('/create-payment-intent', async(req, res) =>{
+            const service = req.body;
+            console.log(service)
+            const price = service.price;
+            const amount = price*100;
+            const paymentIntent = await stripe.paymentIntents.create({
+              amount : amount,
+              currency: 'usd',
+              payment_method_types:['card']
+            });
+            res.send({clientSecret: paymentIntent.client_secret})
+          });
+            
+          //adding new tools
+          app.post('/newTool',async(req,res)=>{
+            const tool = req.body;
+            const result = await toolsCollection.insertOne(tool);
+            res.send(result);
+          })
 
 
     }
