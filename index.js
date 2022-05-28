@@ -100,15 +100,6 @@ async function run(){
           });
 
 
-          // //adding user api 
-          // app.put("/user/:email", async (req, res) => {
-            
-          //   const emial = req.params.email;
-          //   const { name, email, phone, city, education, img } = req.body;
-          //   const res = await userCollection.updateOne({ email: emial} , { $set: {name : name, email: email, phone: phone,education : education ,img : img, city: city } } )
-          //     res.send(res);
-          //   })
-
 
           app.put('/user/:email',async(req,res)=>{
             const email = req.params.email;
@@ -118,15 +109,19 @@ async function run(){
             const updateDoc = {
               $set: user,
             };
-            const result = await userCollection.updateOne(filter,updateDoc, options);
+            const result = await userCollection.updateMany(filter,updateDoc, options);
             res.send(result);
           });
 
-          //user get api for profile
+
+          
+          
+          
+          //get api for profile
           app.get('/userByEmail',async(req,res)=>{
             const email = req.query.email;
             const query = {email : email};
-            const result = await userCollection.find(query).sort({_id:1}).toArray();
+            const result = await userCollection.findOne(query);
             res.send(result);
           });
 
